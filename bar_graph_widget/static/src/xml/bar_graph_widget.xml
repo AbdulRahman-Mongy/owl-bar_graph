@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+
+    <t t-name="ShowBarGraphInfo">
+        <div width="100" height="100">
+            <div>
+                <canvas width="100" height="40"/>
+            </div>
+        </div>
+    </t>
+
+</templates>
