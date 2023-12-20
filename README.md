@@ -38,4 +38,5 @@ bargraph_field_json = fields.Text(compute='_compute_bargraph_field_json')
 ## Reference 
 This component was made using [Chart.js library](https://www.chartjs.org/docs/latest/)
 
+Thanks to [Abdulrahman Saber](https://github.com/abdurrahmansaber) for upgrading it to v16.
 
