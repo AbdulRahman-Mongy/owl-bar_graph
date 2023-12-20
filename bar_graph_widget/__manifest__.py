@@ -19,14 +19,9 @@
     'data': [
     ],
     'assets': {
-        'lqms.lqms_assets': [
-            'web/static/lib/Chart/Chart.js',
-        ],
         'web.assets_backend': [
             'bar_graph_widget/static/src/js/bar_graph_field.js',
-        ],
-        'web.assets_qweb': [
-            'bar_graph_widget/static/src/xml/**/*',
+            'bar_graph_widget/static/src/xml/bar_graph_widget.xml',
         ],
     },
 }

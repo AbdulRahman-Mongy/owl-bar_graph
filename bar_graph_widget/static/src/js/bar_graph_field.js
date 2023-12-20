@@ -1,80 +1,53 @@
-odoo.define('bar_graph_widget.bar_graph', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var AbstractField = require('web.AbstractField');
-var core = require('web.core');
-var field_registry = require('web.field_registry');
-var field_utils = require('web.field_utils');
+import { registry } from "@web/core/registry";
+import { loadJS } from "@web/core/assets";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
-var D3_COLORS = ["#1f77b4","#ff7f0e","#aec7e8","#ffbb78","#2ca02c","#98df8a","#d62728",
-                    "#ff9896","#9467bd","#c5b0d5","#8c564b","#c49c94","#e377c2","#f7b6d2",
-                    "#7f7f7f","#c7c7c7","#bcbd22","#dbdb8d","#17becf","#9edae5"];
+import { Component, xml, onWillStart, useEffect, useRef } from "@odoo/owl";
 
-
-var QWeb = core.qweb;
-var _t = core._t;
-
-var ShowBarGraphWidget = AbstractField.extend({
-
-    jsLibs: [
-        '/web/static/lib/Chart/Chart.js',
-    ],
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-
-
+export class BarGraphWidget extends Component {
     /**
      * @override
-     * @returns {boolean}
      */
-    isSet: function() {
-        return true;
-    },
+     setup() {
+        this.chart = null;
+        this.canvasRef = useRef("canvas");
 
-    /**
-     * @private
-     * @override
-     */
-    _render: function() {
-        this.viewAlreadyOpened = false;
-        var self = this;
-        var info = JSON.parse(this.value);
-        if (!info) {
-            this.$el.html('');
-            return;
-        }
-        var lbs = []
-        var vls = []
-        _.each(info.content, function (k, v){
-            // build the graph data
+        onWillStart(() => loadJS("/web/static/lib/Chart/Chart.js"));
+
+
+        useEffect(() => {
+            this.renderChart();
+            return () => {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+            };
+        });
+
+    }
+
+    renderChart() {
+        const jsonValue = JSON.parse(this.props.value); // Get the JSON data from the field
+
+        var labels = [];
+        var values = [];
+        _.each(jsonValue.content, function (k){
             for (const [title, value] of Object.entries(k)) {
-                lbs.push(title);
-                vls.push(value);
+                labels.push(title);
+                values.push(value);
             }
         });
 
-        // pass the initial values for this template
-        this.$el.html(QWeb.render('ShowBarGraphInfo', {
-
-        }));
-        var $canvas = this.$('canvas');
-        var ctx = $canvas.get(0).getContext('2d');
-        var conf = this._getBarChartConfig(lbs, vls);
-        var chart = new Chart(ctx, conf);
-    },
-
-    _getBarChartConfig: function (lbs, vals) {
-        return {
-            type: 'bar',
+        const config = {
+            type: "bar",
             data: {
-                labels: lbs,
+                labels: labels,
                 datasets: [{
-                    data: vals,
+                    data: values,
                     backgroundColor: "#1f77b4"
-                }]
+                }],
             },
             options: {
                 legend: {display: false},
@@ -87,14 +60,13 @@ var ShowBarGraphWidget = AbstractField.extend({
                 }
             },
         };
-    },
+        this.chart = new Chart(this.canvasRef.el, config);
+    }
+}
 
-});
-
-field_registry.add('bar_graph', ShowBarGraphWidget);
-
-return {
-    ShowBarGraphWidget: ShowBarGraphWidget
+BarGraphWidget.template = 'bar_graph_widget.BarGraphField';
+BarGraphWidget.props = {
+    ...standardFieldProps
 };
 
-});
+registry.category("fields").add("bar_graph", BarGraphWidget);
